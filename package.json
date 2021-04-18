@@ -12,6 +12,7 @@
     "@discordjs/opus": "^0.5.0",
     "discord.js": "^12.5.3",
     "get-mp3-duration": "^1.0.0",
-    "string-similarity": "^4.0.4"
+    "string-similarity": "^4.0.4",
+    "uuid": "^8.3.2"
   }
 }
