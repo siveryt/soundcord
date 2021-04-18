@@ -46,12 +46,21 @@ client.on('message', (message) => {
 
   if (message.author.bot) return
   if (!message.content.startsWith(prefix)) return
-
-  if (message.content.startsWith(prefix + 'sound')) {
+  if (message.content.startsWith(prefix + 'sounds')) {
+    if (message.channel.type != 'dm') {
+      message.delete()
+    }
+    var msg = '__Here is a list of all my sounds:__'
+    sounds.forEach((sound) => {
+      msg = msg + `\n${sound.replace('.mp3', '')}`
+    })
+    msg = msg + `\nHave fun! ${emojiList[Math.floor(Math.random() * emojiList.length)]}`
+    message.author.send(msg)
+  } else if (message.content.startsWith(prefix + 'sound') || message.content.startsWith(prefix + '-')) {
     if (message.channel.type === 'dm') {
       return message.reply("I can't execute that command inside DMs! " + emojiList[Math.floor(Math.random() * emojiList.length)])
     }
-    if (cooldown[message.author.id] && cooldown[message.author.id] > parseInt(Date.now() / 1000)) {
+    if (cooldown[message.author.id] && cooldown[message.author.id] > parseInt(Date.now() / 1000) && message.author.id != 419828969588916225) {
       message.delete()
       return message.author.send("You can't spam this command! Please wait a little bit before using a command again! " + emojiList[Math.floor(Math.random() * emojiList.length)])
     } else {
@@ -81,7 +90,7 @@ client.on('message', (message) => {
         var sound = 'custom/' + nowid + '.mp3'
       }
     } else {
-      var sound = message.content.replace('*sound ', '')
+      var sound = message.content.replace('*sound ', '').replace('*- ', '')
       sound = stringSimilarity.findBestMatch(sound + '.mp3', sounds)
       sound = sound.bestMatch.target
       sound = 'sounds/' + sound
@@ -95,7 +104,7 @@ client.on('message', (message) => {
     }
 
     if (sound < 0.2) {
-      return sender.send("We couldn't find the sound you're looking for. Please try an other. get the full list at https://soundcord.sivery.de " + emojiList[Math.floor(Math.random() * emojiList.length)])
+      return sender.send("We couldn't find the sound you're looking for. Please try an other. Get the full list with `*sounds` " + emojiList[Math.floor(Math.random() * emojiList.length)])
     }
 
     if (target.voice.channel == null) {

@@ -1,1 +1,1 @@
-screen -AmdS notify node index.js
+screen -AmdS soundcord node index.js > log.txt
