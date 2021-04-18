@@ -51,7 +51,7 @@ client.on('message', (message) => {
     if (message.channel.type === 'dm') {
       return message.reply("I can't execute that command inside DMs! " + emojiList[Math.floor(Math.random() * emojiList.length)])
     }
-    if (cooldown[message.author.id]) {
+    if (cooldown[message.author.id] && cooldown[message.author.id] > parseInt(Date.now() / 1000)) {
       message.delete()
       return message.author.send("You can't spam this command! Please wait a little bit before using a command again! " + emojiList[Math.floor(Math.random() * emojiList.length)])
     } else {
@@ -142,7 +142,7 @@ client.on('message', (message) => {
     if (message.channel.type != 'dm') {
       message.delete({ timeout: 100 })
     }
-    message.author.send(`**Soundcord Help**\nUse \`*sound Sound_name\` to play a Sound in the channel you are currently in. \n If you mention someone at the end of the command, you can play a sound in his channel, even if you aren't in the same Channel as he is (Great for pranks)\nA vilad command could look like this:\n \`*sound Meow @${message.author.username}\``)
+    message.author.send(`**Soundcord Help**\n If I'm new on you server, please set me up, by typing \`*setup\` \nUse \`*sound Sound_name\` to play a Sound in the channel you are currently in. \n If you mention someone at the end of the command, you can play a sound in his channel, even if you aren't in the same Channel as he is (Great for pranks)\nA vilad command could look like this:\n \`*sound Meow @${message.author.username}\``)
   }
   if (message.content.startsWith(prefix + 'setup')) {
     if (message.channel.type != 'dm') {
