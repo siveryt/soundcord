@@ -7,8 +7,10 @@ const uuidv1 = require('uuid/v1')
 const getMP3Duration = require('get-mp3-duration')
 const { prefix, token } = require('./config.json')
 const client = new Discord.Client()
+client.cooldowns = new Discord.Collection()
 let request = require(`request`)
 const invite = 'https://discord.com/api/oauth2/authorize?client_id=828596063749406740&permissions=808545344&redirect_uri=https%3A%2F%2Fsoundcord.sivery.de%2Finvite.html&scope=bot'
+var cooldown = {}
 
 const emojiList = ['🤪', '😜', '🤫', '🤥', '😈', '🤡', '💩', '👊', '🥷', '💆‍♂️', '💃', '🐌', '🫐', '♻️', '⚽️']
 
@@ -33,6 +35,7 @@ client.once('ready', () => {
   })
 
   console.log('Ready!')
+  console.log(Date.now())
 })
 
 client.on('message', (message) => {
@@ -48,16 +51,20 @@ client.on('message', (message) => {
     if (message.channel.type === 'dm') {
       return message.reply("I can't execute that command inside DMs! " + emojiList[Math.floor(Math.random() * emojiList.length)])
     }
+    if (cooldown[message.author.id]) {
+      message.delete()
+      return message.author.send("You can't spam this command! Please wait a little bit before using a command again! " + emojiList[Math.floor(Math.random() * emojiList.length)])
+    } else {
+      cooldown[message.author.id] = parseInt(Date.now() / 1000) + 30
+    }
+
     if (message.guild.roles.cache.find((role) => role.name === 'Soundcord user') == undefined) {
-      console.log('Roll enich vorhanden')
       return message.author.send(`Soundcord isn't setup yet on ${message.guild.name}. You can setup it, by typing \`*setup\` on the Server. Bye! ${emojiList[Math.floor(Math.random() * emojiList.length)]}`)
     }
 
     let soundRole = message.guild.roles.cache.find((role) => role.name === 'Soundcord user')
-    console.log(soundRole)
 
     if (message.member.roles.cache.has(soundRole.id)) {
-      console.log(`Yay, the author of the message has the role!`)
     } else {
       message.delete()
       return message.author.send(`You don't have the permission to use use Soundcord on ${message.guild.name}! :sob: But if you invite me to your Server, you can do whatever you want!`)
@@ -124,8 +131,6 @@ client.on('message', (message) => {
               if (err) {
                 throw err
               }
-
-              console.log('File is deleted.')
             })
           }
         }, duration + 100)
