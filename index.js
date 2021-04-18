@@ -3,12 +3,14 @@
 const fs = require('fs')
 const Discord = require('discord.js')
 var stringSimilarity = require('string-similarity')
+const uuidv1 = require('uuid/v1')
 const getMP3Duration = require('get-mp3-duration')
 const { prefix, token } = require('./config.json')
 const client = new Discord.Client()
 let request = require(`request`)
+const invite = 'https://discord.com/api/oauth2/authorize?client_id=828596063749406740&permissions=808545344&redirect_uri=https%3A%2F%2Fsoundcord.sivery.de%2Finvite.html&scope=bot'
 
-const emojiList = ['🤪', '😜', '🤫', '🤥', '😈', '🤡', '💩', '👊', '🥷', '💆‍♂️', '💃', '🐌', '🫐', '🍆', '⚽️']
+const emojiList = ['🤪', '😜', '🤫', '🤥', '😈', '🤡', '💩', '👊', '🥷', '💆‍♂️', '💃', '🐌', '🫐', '♻️', '⚽️']
 
 var sounds = fs.readdirSync('./sounds/')
 function getUserFromMention(mention) {
@@ -43,6 +45,9 @@ client.on('message', (message) => {
   if (!message.content.startsWith(prefix)) return
 
   if (message.content.startsWith(prefix + 'sound')) {
+    if (message.channel.type === 'dm') {
+      return message.reply("I can't execute that command inside DMs! " + emojiList[Math.floor(Math.random() * emojiList.length)])
+    }
     if (message.guild.roles.cache.find((role) => role.name === 'Soundcord user') == undefined) {
       console.log('Roll enich vorhanden')
       return message.author.send(`Soundcord isn't setup yet on ${message.guild.name}. You can setup it, by typing \`*setup\` on the Server. Bye! ${emojiList[Math.floor(Math.random() * emojiList.length)]}`)
@@ -55,20 +60,25 @@ client.on('message', (message) => {
       console.log(`Yay, the author of the message has the role!`)
     } else {
       message.delete()
-      return message.author.send(`You don't have the permission to use use Soundcord! :sob:`)
+      return message.author.send(`You don't have the permission to use use Soundcord on ${message.guild.name}! :sob: But if you invite me to your Server, you can do whatever you want!`)
     }
+    var nowid = uuidv1()
 
-    if (msg.attachments.first()) {
+    if (message.attachments.first()) {
       //checks if an attachment is sent
-      if (msg.attachments.first().filename === `mp3`) {
-        request.get(msg.attachments.first().url).on('error', console.error).pipe(fs.createWriteStream('meme.png'))
+      if (message.attachments.first()) {
+        request
+          .get(message.attachments.first().url)
+          .on('error', console.error)
+          .pipe(fs.createWriteStream('custom/' + nowid + '.mp3'))
+        var sound = 'custom/' + nowid + '.mp3'
       }
+    } else {
+      var sound = message.content.replace('*sound ', '')
+      sound = stringSimilarity.findBestMatch(sound + '.mp3', sounds)
+      sound = sound.bestMatch.target
+      sound = 'sounds/' + sound
     }
-
-    var sound = message.content.replace('*sound ', '')
-    sound = stringSimilarity.findBestMatch(sound + '.mp3', sounds)
-    sound = sound.bestMatch.target
-
     var sender = message.author
 
     if (getUserFromMention(args[args.length - 1]) == undefined) {
@@ -78,36 +88,46 @@ client.on('message', (message) => {
     }
 
     if (sound < 0.2) {
-      return sender.send("We couldn't find the sound you're looking for. Please try an other. get the full list at https://soundcord.sivery.de")
-    }
-
-    if (message.channel.type === 'dm') {
-      return message.reply("I can't execute that command inside DMs!")
+      return sender.send("We couldn't find the sound you're looking for. Please try an other. get the full list at https://soundcord.sivery.de " + emojiList[Math.floor(Math.random() * emojiList.length)])
     }
 
     if (target.voice.channel == null) {
       if (target.id == sender.id) {
-        return sender.send('You must be in a Voicechannel to play sounds.')
+        return sender.send('You must be in a Voicechannel to play sounds. ' + emojiList[Math.floor(Math.random() * emojiList.length)])
       } else {
-        return sender.send('The User you mentioned must be in a Voicechannel to play sounds.')
+        return sender.send('The User you mentioned must be in a Voicechannel to play sounds. ' + emojiList[Math.floor(Math.random() * emojiList.length)])
       }
     }
 
     // return message.reply("VC: " + message.member.voice.id )
 
-    sender.send('You played *' + sound + '* in *' + message.member.voice.channel.name + '*')
+    var soundDisplay = sound.replace('sounds/', '')
+    if (soundDisplay.startsWith('custom')) {
+      soundDisplay = 'customSound'
+    }
+
+    sender.send('You played *' + soundDisplay + '* in *' + message.member.voice.channel.name + '* ' + emojiList[Math.floor(Math.random() * emojiList.length)])
     var voiceChannel = target.voice.channel
     message.delete({ timeout: 100 })
     voiceChannel
       .join()
       .then((connection) => {
-        const dispatcher = connection.play('./sounds/' + sound)
+        const dispatcher = connection.play(sound)
 
-        const buffer = fs.readFileSync('./sounds/' + sound)
+        const buffer = fs.readFileSync(sound)
         const duration = getMP3Duration(buffer)
 
         setTimeout(function () {
           voiceChannel.leave()
+          if (sound.startsWith('custom/')) {
+            fs.unlink(sound, (err) => {
+              if (err) {
+                throw err
+              }
+
+              console.log('File is deleted.')
+            })
+          }
         }, duration + 100)
       })
       .catch((err) => console.log(err))
