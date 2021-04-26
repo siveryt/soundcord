@@ -161,3 +161,6 @@ temp/
 
 # PRIVACY :D
 config.json
+
+# Ignore MP3 files because of Copyright
+*.mp3
