@@ -39,6 +39,7 @@ client.once('ready', () => {
 })
 
 client.on('message', (message) => {
+  message.content = message.content + ' '
   const withoutPrefix = message.content.slice(prefix.length)
   const split = withoutPrefix.split(/ +/)
   const command = split[0]
