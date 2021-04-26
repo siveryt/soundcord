@@ -76,7 +76,7 @@ client.on('message', (message) => {
     if (message.member.roles.cache.has(soundRole.id)) {
     } else {
       message.delete()
-      return message.author.send(`You don't have the permission to use use Soundcord on ${message.guild.name}! :sob: But if you invite me to your Server, you can do whatever you want!`)
+      return message.author.send(`You don't have the permission to use use Soundcord on ${message.guild.name}! :sob: You need to have the \`Soundcord user\` role. But if you invite me to your Server, you can do whatever you want!`)
     }
     var nowid = uuidv1()
 
@@ -151,7 +151,7 @@ client.on('message', (message) => {
     if (message.channel.type != 'dm') {
       message.delete({ timeout: 100 })
     }
-    message.author.send(`**Soundcord Help**\n If I'm new on you server, please set me up, by typing \`*setup\` \nUse \`*sound Sound_name\` to play a Sound in the channel you are currently in. \n If you mention someone at the end of the command, you can play a sound in his channel, even if you aren't in the same Channel as he is (Great for pranks)\nA vilad command could look like this:\n \`*sound Meow @${message.author.username}\``)
+    message.author.send(`**Soundcord Help**\n If I'm new on you server, please set me up, by typing \`*setup\` \nUse \`*sound Sound_name\` to play a Sound in the channel you are currently in. You also can upload a mp3 file, which isn't longer than 5 seconds to play this mp3 file. As alternative to \`*sound\` you also can use \`*-\` and use the same functions as \`*sound\` uses. \n If you mention someone at the end of the command, you can play a sound in his channel, even if you aren't in the same Channel as he is (Great for pranks)\nA vilad command could look like this:\n \`*sound Meow @${message.author.username}\`\n`)
   }
   if (message.content.startsWith(prefix + 'setup')) {
     if (message.channel.type != 'dm') {
@@ -163,10 +163,14 @@ client.on('message', (message) => {
           name: 'Soundcord user',
           color: 'BLUE',
         },
-        reason: 'I NEED THIS!!!',
+        reason: 'Give the user which are allowed to use soundcord this role.',
       })
     }
-    message.author.send('Soundcord successfully installed! Have fun using it! 🩳')
+    message.author.send('Soundcord successfully installed! Have fun using it! ' + emojiList[Math.floor(Math.random() * emojiList.length)])
+  }
+  if (message.content.startsWith(prefix + 'invite')) {
+    message.delete()
+    message.author.send('Hey, if you want to invite me to your own Server, just click this link: ' + invite + ' ' + emojiList[Math.floor(Math.random() * emojiList.length)])
   }
 
   // do the same for the rest of the commands...
