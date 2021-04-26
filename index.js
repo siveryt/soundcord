@@ -9,7 +9,7 @@ const { prefix, token } = require('./config.json')
 const client = new Discord.Client()
 client.cooldowns = new Discord.Collection()
 let request = require(`request`)
-const invite = 'https://discord.com/api/oauth2/authorize?client_id=828596063749406740&permissions=808545344&redirect_uri=https%3A%2F%2Fsoundcord.sivery.de%2Finvite.html&scope=bot'
+const invite = 'https://discord.com/api/oauth2/authorize?client_id=828596063749406740&permissions=808545344&scope=bot'
 var cooldown = {}
 
 const emojiList = ['🤪', '😜', '🤫', '🤥', '😈', '🤡', '💩', '👊', '🥷', '💆‍♂️', '💃', '🐌', '🫐', '♻️', '⚽️']
@@ -83,10 +83,13 @@ client.on('message', (message) => {
     if (message.attachments.first()) {
       //checks if an attachment is sent
       if (message.attachments.first()) {
+        console.log(message.attachments.first().url)
+        if (!message.attachments.first().url.endsWith('.mp3')) return message.author.send('You have to send me a mp3 file, so that i can play it in a voicechannel.')
         request
           .get(message.attachments.first().url)
           .on('error', console.error)
           .pipe(fs.createWriteStream('custom/' + nowid + '.mp3'))
+
         var sound = 'custom/' + nowid + '.mp3'
       }
     } else {
@@ -122,7 +125,6 @@ client.on('message', (message) => {
       soundDisplay = 'customSound'
     }
 
-    sender.send('You played *' + soundDisplay + '* in *' + message.member.voice.channel.name + '* ' + emojiList[Math.floor(Math.random() * emojiList.length)])
     var voiceChannel = target.voice.channel
     message.delete({ timeout: 100 })
     voiceChannel
@@ -132,6 +134,17 @@ client.on('message', (message) => {
 
         const buffer = fs.readFileSync(sound)
         const duration = getMP3Duration(buffer)
+        if (duration > 10000 && sound.startsWith('custom')) {
+          voiceChannel.leave()
+          fs.unlink(sound, (err) => {
+            if (err) {
+              throw err
+            }
+          })
+
+          return sender.send('Your custom mp3 file can only be up to 10 seconds long')
+        }
+        sender.send('You played *' + soundDisplay + '* in *' + message.member.voice.channel.name + '* ' + emojiList[Math.floor(Math.random() * emojiList.length)])
 
         setTimeout(function () {
           voiceChannel.leave()
@@ -169,7 +182,9 @@ client.on('message', (message) => {
     message.author.send('Soundcord successfully installed! Have fun using it! ' + emojiList[Math.floor(Math.random() * emojiList.length)])
   }
   if (message.content.startsWith(prefix + 'invite')) {
-    message.delete()
+    if (message.channel.type != 'dm') {
+      message.delete()
+    }
     message.author.send('Hey, if you want to invite me to your own Server, just click this link: ' + invite + ' ' + emojiList[Math.floor(Math.random() * emojiList.length)])
   }
 
