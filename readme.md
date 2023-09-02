@@ -2,6 +2,8 @@
 
 # Soundcord
 
+# ⚠️ Archived because Discord implemented a very similar feature on their own but this maybe even keeps working and you can host it yourself :)
+
 ## The easy soundboard for Discord
 
 A very easy to use bot for sounds in Discord Voicechannels
